@@ -249,7 +249,7 @@ export function DataEditor({ open, onOpenChange, data, onSave }: DataEditorProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0">
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0 max-sm:max-w-full max-sm:max-h-[95dvh] max-sm:mx-2 max-sm:rounded-xl">
         <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
           <DialogTitle>编辑导航数据</DialogTitle>
         </DialogHeader>

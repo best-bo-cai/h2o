@@ -1,19 +1,15 @@
 import { useState } from "react"
-import type { NavSection as NavSectionType, NavItem } from "@/lib/types"
+import type { NavSection as NavSectionType } from "@/lib/types"
 import { NavCard } from "./NavCard"
 
 interface NavSectionProps {
   section: NavSectionType
-  onEditItem?: (item: NavItem, sectionIndex: number) => void
-  onDeleteItem?: (item: NavItem, sectionIndex: number) => void
   onReorder?: (sectionIndex: number, fromIndex: number, toIndex: number) => void
   sectionIndex: number
 }
 
 export function NavSection({
   section,
-  onEditItem,
-  onDeleteItem,
   onReorder,
   sectionIndex,
 }: NavSectionProps) {
@@ -47,8 +43,6 @@ export function NavSection({
             key={`${item.title}-${item.sortOrder}`}
             item={item}
             index={index}
-            onEdit={(i) => onEditItem?.(i, sectionIndex)}
-            onDelete={(i) => onDeleteItem?.(i, sectionIndex)}
             onDragStart={(e) => {
               e.dataTransfer.setData("text/plain", String(index))
               e.dataTransfer.effectAllowed = "move"

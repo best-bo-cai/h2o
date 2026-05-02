@@ -5,8 +5,6 @@ import type { NavItem } from "@/lib/types"
 interface NavCardProps {
   item: NavItem
   index?: number
-  onEdit?: (item: NavItem) => void
-  onDelete?: (item: NavItem) => void
   onDragStart?: (e: React.DragEvent) => void
   onDragOver?: (e: React.DragEvent) => void
   onDragLeave?: () => void
@@ -16,8 +14,6 @@ interface NavCardProps {
 
 export function NavCard({
   item,
-  onEdit,
-  onDelete,
   onDragStart,
   onDragOver,
   onDragLeave,
@@ -44,19 +40,6 @@ export function NavCard({
         "transition-all duration-300 ease-out",
         isDragOver && "ring-2 ring-primary ring-offset-2 rounded-xl"
       )}
-      onContextMenu={(e) => {
-        if (onEdit || onDelete) {
-          e.preventDefault()
-          const edit = window.confirm(
-            `编辑 "${item.title}"？\n确定=编辑 | 取消=删除`
-          )
-          if (edit) {
-            onEdit?.(item)
-          } else {
-            onDelete?.(item)
-          }
-        }
-      }}
     >
       <div
         className={cn(

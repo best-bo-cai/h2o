@@ -65,7 +65,7 @@ export function ShareDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-sm:max-w-full max-sm:max-h-[95dvh] max-sm:mx-2 max-sm:rounded-xl max-sm:overflow-y-auto">
         <DialogHeader>
           <DialogTitle>分享与导入</DialogTitle>
           <DialogDescription>

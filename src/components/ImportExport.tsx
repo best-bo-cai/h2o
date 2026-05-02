@@ -45,7 +45,8 @@ export function ImportExport({
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "h2o-navigation-backup.json"
+    const dateStr = new Date().toISOString().slice(0, 10)
+    a.download = `h2o-navigation-backup-${dateStr}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -63,7 +64,7 @@ export function ImportExport({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-sm:max-w-full max-sm:max-h-[95dvh] max-sm:mx-2 max-sm:rounded-xl max-sm:overflow-y-auto">
         <DialogHeader>
           <DialogTitle>导入 / 导出数据</DialogTitle>
         </DialogHeader>

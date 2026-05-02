@@ -9,7 +9,6 @@ import { DataEditor } from "@/components/DataEditor"
 import { ImportExport } from "@/components/ImportExport"
 import { ShareDialog } from "@/components/ShareDialog"
 import { useNavigation } from "@/hooks/useNavigation"
-import type { NavItem } from "@/lib/types"
 
 function App() {
   const {
@@ -32,20 +31,6 @@ function App() {
   const sortedSections = [...data.sections].sort(
     (a, b) => a.sortOrder - b.sortOrder
   )
-
-  const handleEditItem = () => {
-    setEditorOpen(true)
-  }
-
-  const handleDeleteItem = (item: NavItem, sectionIndex: number) => {
-    const sections = [...data.sections]
-    const section = sections[sectionIndex]
-    const items = section.items.filter(
-      (i) => !(i.title === item.title && i.url === item.url)
-    )
-    sections[sectionIndex] = { ...section, items }
-    save({ ...data, sections })
-  }
 
   const handleReorder = (
     sectionIndex: number,
@@ -155,8 +140,6 @@ function App() {
             {sortedSections[activeSection] && (
               <NavSection
                 section={sortedSections[activeSection]}
-                onEditItem={handleEditItem}
-                onDeleteItem={handleDeleteItem}
                 onReorder={handleReorder}
                 sectionIndex={
                   data.sections.findIndex(
@@ -172,7 +155,7 @@ function App() {
       <footer className="border-t border-border/60 py-6 text-center relative">
         <DecoWave className="bottom-0 left-0 right-0 h-16" />
         <p className="text-xs text-muted-foreground relative z-10">
-          H2O 导航页 · 简约插画风格 · 右键卡片可编辑/删除
+          H2O 导航页 · 简约插画风格
         </p>
       </footer>
 
