@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { NavSection } from "@/components/NavSection"
 import { SearchBox } from "@/components/SearchBox"
+import { DecoCircle, DecoWave, DecoTriangle, DecoDots } from "@/components/Decorations"
 import { DataEditor } from "@/components/DataEditor"
 import { ImportExport } from "@/components/ImportExport"
 import { ShareDialog } from "@/components/ShareDialog"
@@ -76,9 +77,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-foreground">
+          <h1 className="text-lg font-semibold text-foreground tracking-wide">
             {data.pageInfo.title}
           </h1>
           <div className="flex items-center gap-1">
@@ -116,7 +117,11 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full relative overflow-hidden">
+        <DecoCircle className="w-72 h-72 -top-36 -right-36 text-primary animate-pulse-soft" />
+        <DecoCircle className="w-48 h-48 -bottom-24 -left-24 text-accent animate-float" />
+        <DecoTriangle className="top-20 right-10" />
+        <DecoDots className="bottom-10 right-20" />
         {sortedSections.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-muted-foreground mb-4">
@@ -132,15 +137,15 @@ function App() {
             <div className="mb-6">
               <SearchBox engines={data.searchEngines} />
             </div>
-            <div className="flex flex-wrap justify-center gap-1 mb-6">
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
               {sortedSections.map((section, index) => (
                 <button
                   key={section.name}
                   onClick={() => setActiveSection(index)}
                   className={
                     activeSection === index
-                      ? "px-4 py-1.5 rounded-full text-sm font-medium bg-primary text-primary-foreground transition-colors"
-                      : "px-4 py-1.5 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      ? "px-5 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md transition-all duration-300"
+                      : "px-5 py-2 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/60 hover:shadow-sm transition-all duration-300"
                   }
                 >
                   {section.name}
@@ -164,9 +169,10 @@ function App() {
         )}
       </main>
 
-      <footer className="border-t border-border py-6 text-center">
-        <p className="text-xs text-muted-foreground">
-          H2O 导航页 · 极简风格 · 右键卡片可编辑/删除
+      <footer className="border-t border-border/60 py-6 text-center relative">
+        <DecoWave className="bottom-0 left-0 right-0 h-16" />
+        <p className="text-xs text-muted-foreground relative z-10">
+          H2O 导航页 · 简约插画风格 · 右键卡片可编辑/删除
         </p>
       </footer>
 

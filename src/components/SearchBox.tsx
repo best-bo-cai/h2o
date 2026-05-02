@@ -50,11 +50,11 @@ export function SearchBox({ engines }: SearchBoxProps) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="搜索..."
-          className="pl-9 h-10 rounded-full border-border bg-background"
+          className="pl-9 h-11 rounded-full border-border/60 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md focus-within:shadow-md transition-all duration-300"
         />
       </div>
       <Select value={selectedEngine} onValueChange={setSelectedEngine}>
-        <SelectTrigger className="w-[110px] h-10 rounded-full">
+        <SelectTrigger className="w-[110px] h-11 rounded-full bg-white/80 backdrop-blur-sm border-border/60 shadow-sm hover:shadow-md transition-all duration-300">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="bg-white dark:bg-gray-900 border-border">

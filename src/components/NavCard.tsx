@@ -41,8 +41,8 @@ export function NavCard({
         "group flex flex-col items-center gap-1.5 p-1",
         "w-[60px]",
         "cursor-pointer",
-        "transition-all duration-200",
-        isDragOver && "ring-2 ring-primary ring-offset-1 rounded-lg"
+        "transition-all duration-300 ease-out",
+        isDragOver && "ring-2 ring-primary ring-offset-2 rounded-xl"
       )}
       onContextMenu={(e) => {
         if (onEdit || onDelete) {
@@ -61,11 +61,13 @@ export function NavCard({
       <div
         className={cn(
           "w-[42px] h-[42px] rounded-full",
-          "bg-muted",
+          "bg-gradient-to-br from-primary/10 via-accent/5 to-secondary",
           "flex items-center justify-center",
-          "transition-all duration-200",
-          "group-hover:bg-muted-foreground/15 group-hover:shadow-md",
-          "overflow-hidden shrink-0"
+          "transition-all duration-300 ease-out",
+          "group-hover:scale-110 group-hover:shadow-lg",
+          "group-hover:from-primary/20 group-hover:to-accent/15",
+          "overflow-hidden shrink-0",
+          "border border-border/50"
         )}
       >
         {!showFallback && (
@@ -84,8 +86,8 @@ export function NavCard({
       </div>
       <span
         className={cn(
-          "text-xs text-foreground truncate w-full text-center",
-          "group-hover:text-primary transition-colors duration-200"
+          "text-[11px] text-foreground truncate w-full text-center",
+          "group-hover:text-primary transition-colors duration-300"
         )}
       >
         {item.title}
