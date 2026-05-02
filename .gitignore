@@ -24,3 +24,6 @@ mod_log
 *.njsproj
 *.sln
 *.sw?
+
+prd.md
+public/favicon0*
