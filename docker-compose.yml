@@ -1,0 +1,8 @@
+services:
+  h2o-web-page:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    restart: unless-stopped
