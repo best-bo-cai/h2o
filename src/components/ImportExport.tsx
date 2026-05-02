@@ -64,7 +64,7 @@ export function ImportExport({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-sm:max-w-full max-sm:max-h-[95dvh] max-sm:mx-2 max-sm:rounded-xl max-sm:overflow-y-auto">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>导入 / 导出数据</DialogTitle>
         </DialogHeader>
