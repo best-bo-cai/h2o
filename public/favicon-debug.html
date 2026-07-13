@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Favicon 探测诊断</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 20px;
+  }
+  h1 { font-size: 20px; margin-bottom: 16px; color: #f0f6fc; }
+  .controls {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+  }
+  button {
+    padding: 8px 20px; border-radius: 6px; border: 1px solid #30363d;
+    background: #21262d; color: #c9d1d9; cursor: pointer; font-size: 13px;
+  }
+  button:hover { background: #30363d; }
+  button.primary { background: #238636; border-color: #238636; color: #fff; }
+  button.primary:hover { background: #2ea043; }
+  input[type="text"] {
+    padding: 8px 12px; border-radius: 6px; border: 1px solid #30363d;
+    background: #0d1117; color: #c9d1d9; font-size: 13px; width: 320px;
+  }
+  .stats {
+    display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .stat-card {
+    border: 1px solid #30363d; border-radius: 8px;
+    padding: 12px 18px; background: #161b22; min-width: 140px;
+  }
+  .stat-card .val { font-size: 28px; font-weight: 700; }
+  .stat-card .lbl { font-size: 12px; color: #8b949e; margin-top: 2px; }
+  .stat-card.green .val { color: #3fb950; }
+  .stat-card.yellow .val { color: #d29922; }
+  .stat-card.red .val { color: #f85149; }
+  .stat-card.cyan .val { color: #58a6ff; }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  th, td {
+    text-align: left; padding: 8px 12px; border-bottom: 1px solid #21262d;
+    vertical-align: top;
+  }
+  th { color: #8b949e; font-weight: 500; font-size: 12px; position: sticky; top: 0; background: #0d1117; }
+  .pass { color: #3fb950; }
+  .fail { color: #f85149; }
+  .warn { color: #d29922; }
+  .info { color: #8b949e; }
+  .source-tag {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    font-size: 11px; margin-right: 4px;
+  }
+  .tag-dd { background: #da3633; color: #fff; }
+  .tag-gg { background: #1f6feb; color: #fff; }
+  .tag-fav { background: #7ee787; color: #0d1117; }
+  img.icon-preview { width: 20px; height: 20px; vertical-align: middle; }
+  .log-area {
+    margin-top: 20px; border: 1px solid #30363d; border-radius: 8px;
+    background: #161b22; padding: 16px; max-height: 400px; overflow-y: auto;
+    font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 12px;
+    line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+  }
+  .progress { height: 4px; background: #21262d; border-radius: 2px; margin-bottom: 16px; }
+  .progress-bar { height: 100%; background: #3fb950; border-radius: 2px; transition: width 0.2s; width: 0%; }
+  td.url { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>Favicon 探测诊断工具</h1>
+
+<div class="controls">
+  <input type="text" id="customUrl" placeholder="手动输入 URL，比如 https://example.com" />
+  <button onclick="testSingle()">测试单条</button>
+  <button class="primary" onclick="runAll()">批量测试全部站点</button>
+  <button onclick="clearLog()">清空日志</button>
+</div>
+
+<div class="progress" id="progressWrap" style="display:none">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="stats">
+  <div class="stat-card" id="statTotal"><div class="val">0</div><div class="lbl">测试站点数</div></div>
+  <div class="stat-card green" id="statDD"><div class="val">0</div><div class="lbl">DuckDuckGo 命中</div></div>
+  <div class="stat-card cyan" id="statGG"><div class="val">0</div><div class="lbl">Google s2 命中</div></div>
+  <div class="stat-card yellow" id="statFav"><div class="val">0</div><div class="lbl">/favicon.ico 命中</div></div>
+  <div class="stat-card red" id="statNone"><div class="val">0</div><div class="lbl">全部失败</div></div>
+</div>
+
+<table id="resultTable">
+  <thead><tr>
+    <th>站点</th>
+    <th>DuckDuckGo</th>
+    <th>Google s2</th>
+    <th>/favicon.ico</th>
+    <th>结果</th>
+  </tr></thead>
+  <tbody id="resultBody"></tbody>
+</table>
+
+<div class="log-area" id="log"></div>
+
+<script>
+// ---------- 测试站点列表（中英文各类型）----------
+const TEST_URLS = [
+  "https://www.baidu.com",
+  "https://www.zhihu.com",
+  "https://www.bilibili.com",
+  "https://www.taobao.com",
+  "https://www.jd.com",
+  "https://www.douyin.com",
+  "https://www.csdn.net",
+  "https://juejin.cn",
+  "https://www.v2ex.com",
+  "https://www.apple.com",
+  "https://github.com",
+  "https://stackoverflow.com",
+  "https://www.google.com",
+  "https://twitter.com",
+  "https://www.youtube.com",
+  "https://www.reddit.com",
+  "https://news.ycombinator.com",
+  "https://react.dev",
+  "https://vitejs.dev",
+  "https://www.npmjs.com",
+]
+
+// ---------- 源定义（与 createDataEditor 中 getFaviconUrls 一致）----------
+function getSources(url) {
+  try {
+    const u = new URL(url)
+    const domain = u.hostname
+    return [
+      { name: "DuckDuckGo", tag: "dd", url: `https://icons.duckduckgo.com/ip3/${domain}.ico` },
+      { name: "Google s2", tag: "gg", url: `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64` },
+      { name: "/favicon.ico", tag: "fav", url: `${u.origin}/favicon.ico` },
+    ]
+  } catch {
+    return []
+  }
+}
+
+// ---------- 探测单个源（沿用 createDataEditor 同款 Image 方式）----------
+function probeSource(srcUrl, timeoutMs = 5000) {
+  const start = performance.now()
+  return new Promise((resolve) => {
+    const img = new Image()
+    let settled = false
+    const finish = (status, detail) => {
+      if (settled) return
+      settled = true
+      const elapsed = Math.round(performance.now() - start)
+      resolve({ url: srcUrl, status, detail, elapsed })
+    }
+    const timer = setTimeout(() => finish("timeout", "超时 " + timeoutMs + "ms"), timeoutMs)
+    img.onload = () => {
+      clearTimeout(timer)
+      const { naturalWidth: w, naturalHeight: h } = img
+      finish("loaded", { w, h, ratio: h ? (w/h).toFixed(2) : "-" })
+    }
+    img.onerror = (e) => {
+      clearTimeout(timer)
+      finish("error", "网络错误 / 404 / 非图片资源")
+    }
+    img.onabort = () => {
+      clearTimeout(timer)
+      finish("abort", "加载被中止")
+    }
+    img.src = srcUrl
+  })
+}
+
+// ---------- 日志 ----------
+function log(msg, cls = "") {
+  const el = document.getElementById("log")
+  const div = document.createElement("div")
+  div.className = cls
+  div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`
+  el.prepend(div)
+}
+
+// ---------- 更新统计 ----------
+function updateStats() {
+  const rows = document.querySelectorAll("#resultBody tr")
+  let total = 0, dd = 0, gg = 0, fav = 0, none = 0
+  rows.forEach(tr => {
+    total++
+    const cells = tr.querySelectorAll("td")
+    if (cells[1]?.classList.contains("pass")) dd++
+    if (cells[2]?.classList.contains("pass")) gg++
+    if (cells[3]?.classList.contains("pass")) fav++
+    const resultCell = cells[4]
+    if (resultCell?.classList.contains("fail")) none++
+  })
+  document.getElementById("statTotal").querySelector(".val").textContent = total
+  document.getElementById("statDD").querySelector(".val").textContent = dd
+  document.getElementById("statGG").querySelector(".val").textContent = gg
+  document.getElementById("statFav").querySelector(".val").textContent = fav
+  document.getElementById("statNone").querySelector(".val").textContent = none
+}
+
+// ---------- 渲染一行结果 ----------
+function renderCell(status, detail, faviconUrl) {
+  if (status === "loaded") {
+    const { w, h } = detail
+    return `<span class="pass">✔</span> <img class="icon-preview" src="${faviconUrl}" /> <span class="info">${w}×${h}</span>`
+  } else if (status === "timeout") {
+    return `<span class="warn">⏱ 超时</span>`
+  } else if (status === "error") {
+    return `<span class="fail" title="${detail}">✘</span>`
+  } else {
+    return `<span class="fail">✘ ${detail || ""}</span>`
+  }
+}
+
+function makeRow(url, results) {
+  // results: [{ name, tag, url, status, detail }]
+  const cells = results.map((r) => {
+    const cls = r.status === "loaded" ? "pass" : (r.status === "timeout" ? "warn" : "fail")
+    const html = renderCell(r.status, r.detail, r.url)
+    return `<td class="${cls}">${html}</td>`
+  })
+
+  // 判断最终结果
+  const firstPass = results.find(r => r.status === "loaded")
+  let resultClass = "fail"
+  let resultText = "❌ 全部失败"
+  if (firstPass) {
+    resultClass = "pass"
+    resultText = `✅ ${firstPass.name}`
+  }
+
+  let hostname
+  try { hostname = new URL(url).hostname } catch { hostname = url }
+  return `<tr>
+    <td class="url" title="${url}">${hostname}</td>
+    ${cells.join("")}
+    <td class="${resultClass}">${resultText}</td>
+  </tr>`
+}
+
+function setProgress(pct) {
+  document.getElementById("progressBar").style.width = pct + "%"
+}
+
+// ---------- 单条测试 ----------
+async function testSingle() {
+  const url = document.getElementById("customUrl").value.trim()
+  if (!url) return
+  const sources = getSources(url)
+  if (!sources.length) { log("❌ 无效 URL", "fail"); return }
+  log(`🔍 正在探测: ${url}`)
+  const results = []
+  for (const s of sources) {
+    const r = await probeSource(s.url, 5000)
+    results.push({ ...s, ...r })
+    const icon =
+      r.status === "loaded"
+        ? `✔ 成功 (${r.detail.w}×${r.detail.h})`
+        : `✘ ${r.status} — ${r.detail}`
+    log(`  ${s.name}: ${icon}  [${r.elapsed}ms]`, r.status === "loaded" ? "pass" : "fail")
+  }
+  const tbody = document.getElementById("resultBody")
+  tbody.insertAdjacentHTML("afterbegin", makeRow(url, results))
+  updateStats()
+}
+
+// ---------- 批量测试 ----------
+async function runAll() {
+  document.getElementById("progressWrap").style.display = "block"
+  setProgress(0)
+
+  // 清空
+  document.getElementById("resultBody").innerHTML = ""
+  document.getElementById("log").innerHTML = ""
+  updateStats()
+  log("🚀 开始批量测试 " + TEST_URLS.length + " 个站点...")
+
+  for (let idx = 0; idx < TEST_URLS.length; idx++) {
+    const url = TEST_URLS[idx]
+    log(`🔍 [${idx + 1}/${TEST_URLS.length}] ${url}`)
+    const sources = getSources(url)
+    if (!sources.length) { continue }
+    const results = []
+    for (const s of sources) {
+      const r = await probeSource(s.url, 5000)
+      results.push({ ...s, ...r })
+      const icon =
+        r.status === "loaded"
+          ? `✔ 成功 (${r.detail.w}×${r.detail.h})`
+          : `✘ ${r.status} — ${r.detail}`
+      log(`  ${s.name}: ${icon}  [${r.elapsed}ms]`, r.status === "loaded" ? "pass" : "fail")
+    }
+    document.getElementById("resultBody").insertAdjacentHTML("beforeend", makeRow(url, results))
+    updateStats()
+    setProgress(((idx + 1) / TEST_URLS.length) * 100)
+  }
+
+  document.getElementById("progressWrap").style.display = "none"
+  log("✅ 批量测试完成！", "pass")
+}
+
+function clearLog() {
+  document.getElementById("log").innerHTML = ""
+  document.getElementById("resultBody").innerHTML = ""
+  updateStats()
+  log("已清空")
+}
+
+// 自动跑第一个演示
+window.addEventListener("DOMContentLoaded", () => {
+  log("准备就绪。点击“批量测试全部站点”开始，或输入单个 URL 测试。")
+  log("说明: 三个源分别对应 DuckDuckGo / Google s2 / 站点自身 favicon.ico")
+  log("检测逻辑: new Image() + onload/onerror + 5秒超时，与应用中 DataEditor 逻辑一致")
+  log("注: 当前使用“加载即有效”，不施加尺寸/比例校验", "info")
+})
+</script>
+</body>
+</html>

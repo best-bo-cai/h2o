@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { NavigationData, NavSection, NavItem, SearchEngine } from "@/lib/types"
+import { getEngineIconUrl } from "@/lib/utils"
 import { Plus, Trash2, GripVertical, Sparkles, ChevronDown, ChevronRight, Loader2 } from "lucide-react"
 
 function getFaviconUrls(url: string): string[] {
@@ -19,9 +20,9 @@ function getFaviconUrls(url: string): string[] {
     const domain = urlObj.hostname
 
     return [
-      `https://icons.duckduckgo.com/ip3/${domain}.ico`,
       `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`,
       `${urlObj.origin}/favicon.ico`,
+      `https://icons.duckduckgo.com/ip3/${domain}.ico`,
     ]
   } catch {
     return []
@@ -39,6 +40,11 @@ function checkImageExists(url: string, timeoutMs = 5000): Promise<boolean> {
     img.onload = () => {
       clearTimeout(timer)
       const { naturalWidth: w, naturalHeight: h } = img
+      // 16x16 是 Google s2 / DuckDuckGo 等服务的默认占位图尺寸，视为无效
+      if (w === 16 && h === 16) {
+        resolve(false)
+        return
+      }
       if (w >= 16 && h >= 16 && w <= 256 && h <= 256) {
         const ratio = w / h
         if (ratio > 0.7 && ratio < 1.3) {
@@ -101,7 +107,7 @@ export function DataEditor({ open, onOpenChange, data, onSave }: DataEditorProps
 
   const addSection = () => {
     const newSection: NavSection = {
-      name: "新分类",
+      name: "网页分类名",
       sortOrder: editData.sections.length,
       items: [],
     }
@@ -126,7 +132,7 @@ export function DataEditor({ open, onOpenChange, data, onSave }: DataEditorProps
     const sections = [...editData.sections]
     const section = sections[sectionIndex]
     const newItem: NavItem = {
-      title: "新链接",
+      title: "网页链接名",
       description: "",
       url: "https://",
       icon: "",
@@ -445,6 +451,14 @@ export function DataEditor({ open, onOpenChange, data, onSave }: DataEditorProps
                     <GripVertical className="h-3 w-3 rotate-180" />
                   </button>
                 </div>
+                <img
+                  src={getEngineIconUrl(engine.urlTemplate)}
+                  alt=""
+                  className="w-7 h-7 rounded mt-1 shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none"
+                  }}
+                />
                 <div className="flex-1 space-y-2">
                   <Input
                     value={engine.name}

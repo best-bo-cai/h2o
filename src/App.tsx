@@ -107,6 +107,9 @@ function App() {
         <DecoCircle className="w-48 h-48 -bottom-24 -left-24 text-accent animate-float" />
         <DecoTriangle className="top-20 right-10" />
         <DecoDots className="bottom-10 right-20" />
+        <div className="mb-6">
+          <SearchBox engines={data.searchEngines} />
+        </div>
         {sortedSections.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-muted-foreground mb-4">
@@ -119,9 +122,6 @@ function App() {
           </div>
         ) : (
           <>
-            <div className="mb-6">
-              <SearchBox engines={data.searchEngines} />
-            </div>
             <div className="flex flex-wrap justify-center gap-2 mb-6">
               {sortedSections.map((section, index) => (
                 <button

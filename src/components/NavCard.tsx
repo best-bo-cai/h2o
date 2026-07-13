@@ -23,6 +23,14 @@ export function NavCard({
   const [imgError, setImgError] = useState(false)
   const showFallback = !item.icon || imgError
 
+  const handleImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget
+    // 16x16 是 Google s2 等服务的默认占位图尺寸，按失败处理
+    if (img.naturalWidth === 16 && img.naturalHeight === 16) {
+      setImgError(true)
+    }
+  }
+
   return (
     <a
       href={item.url}
@@ -59,6 +67,7 @@ export function NavCard({
             alt={item.title}
             className="w-[70%] h-[70%] object-contain"
             onError={() => setImgError(true)}
+            onLoad={handleImgLoad}
           />
         )}
         {showFallback && (
